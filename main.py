@@ -1,6 +1,7 @@
 import logging
 import re
 import os
+import json
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import (
@@ -316,7 +317,8 @@ def main() -> None:
     @app.route('/webhook', methods=['POST'])
     def webhook() -> str:
         json_str = request.get_data(as_text=True)
-        update = Update.de_json(json_str, application.bot)
+        data = json.loads(json_str)  # Parse the JSON data
+        update = Update.de_json(data, application.bot)
         application.process_update(update)
         return 'ok'
 
@@ -326,12 +328,12 @@ def main() -> None:
         await application.bot.set_webhook(url=webhook_url)
 
     # Set webhook after the app is running
-    async def on_startup(application):
+    async def on_startup():
         await set_webhook()
 
     # Run the webhook listener in a separate task
     import asyncio
-    asyncio.run(on_startup(application))
+    asyncio.run(on_startup())
 
     # Start the Flask app
     port = int(os.environ.get('PORT', 5000))
