@@ -236,7 +236,7 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     payment_information = (
         "❔ <b>Payment Information:</b>\n\n"
         "⤵️<b> Always double-check that you have entered the correct address before sending.</b>\n"
-        f"<b>Address:</b> <code>tsouroAdress87826726fgf8</code>\n"
+        f"<b>Address:</b> <code>G2XNkLGnHeFTCj5Eb328t49aV2xL3rYmrwugg4n3BPHm</code>\n"
         f"<b>Amount:</b> <code>{price}</code><b> SOL</b>\n\n"
         "<b>After the transfer, click the button below. You can transfer the rest if you haven't transferred enough.</b>\n\n"
         "<b>To cancel the payment and start over, use /delete.</b>"
