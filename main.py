@@ -329,12 +329,12 @@ def main() -> None:
         return 'Hello World!'
 
     @app.route('/webhook', methods=['POST'])
-    async def webhook() -> str:
+    def webhook():
         json_str = request.get_data(as_text=True)
         data = json.loads(json_str)  # Parse the JSON data
         logger.info(f"Webhook received data: {data}")
         update = Update.de_json(data, application.bot)
-        await process_update(application, update)
+        asyncio.run(process_update(application, update))
         return 'ok'
 
     # Function to set webhook
