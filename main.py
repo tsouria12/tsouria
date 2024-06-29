@@ -329,15 +329,13 @@ def main() -> None:
     async def on_startup(application):
         await set_webhook()
 
-    application.add_handler(CommandHandler("start", start))
+    # Run the webhook listener in a separate task
+    import asyncio
+    asyncio.run(on_startup(application))
 
-    application.run_webhook(
-        listen="0.0.0.0",
-        port=int(os.environ.get('PORT', 5000)),
-        url_path="webhook",
-        webhook_url='https://tsouria.onrender.com/webhook',
-        on_startup=on_startup
-    )
+    # Start the Flask app
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
     main()
