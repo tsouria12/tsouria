@@ -266,7 +266,7 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 def main() -> None:
     """Start the bot."""
     # Insert your API token here
-    token = '7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE'
+    token = 'YOUR_TELEGRAM_BOT_API_TOKEN'
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
@@ -309,6 +309,10 @@ def main() -> None:
     # Create a Flask app
     app = Flask(__name__)
 
+    @app.route('/', methods=['GET'])
+    def index():
+        return 'Hello World!'
+
     @app.route('/webhook', methods=['POST'])
     def webhook() -> str:
         json_str = request.get_data(as_text=True)
@@ -325,7 +329,7 @@ def main() -> None:
     application.job_queue.run_once(lambda context: set_webhook(), 0)
 
     # Start the Flask app
-    port = int(os.environ.get('PORT', 8443))
+    port = int(os.environ.get('PORT', 4000))
     app.run(host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
