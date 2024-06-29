@@ -9,6 +9,7 @@ from telegram.ext import (
     MessageHandler, filters, ContextTypes, ConversationHandler
 )
 from flask import Flask, request
+import asyncio
 
 # Enable logging
 logging.basicConfig(
@@ -273,6 +274,9 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
     return ConversationHandler.END
 
+async def process_update(application, update):
+    await application.process_update(update)
+
 def main() -> None:
     """Start the bot."""
     # Use the provided token directly
@@ -325,12 +329,12 @@ def main() -> None:
         return 'Hello World!'
 
     @app.route('/webhook', methods=['POST'])
-    def webhook() -> str:
+    async def webhook() -> str:
         json_str = request.get_data(as_text=True)
         data = json.loads(json_str)  # Parse the JSON data
         logger.info(f"Webhook received data: {data}")
         update = Update.de_json(data, application.bot)
-        application.process_update(update)
+        await process_update(application, update)
         return 'ok'
 
     # Function to set webhook
@@ -344,7 +348,6 @@ def main() -> None:
         await set_webhook()
 
     # Run the webhook listener in a separate task
-    import asyncio
     asyncio.run(on_startup())
 
     # Start the Flask app
