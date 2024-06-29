@@ -1,13 +1,13 @@
 import logging
 import re
+import os
 from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
     MessageHandler, filters, ContextTypes, ConversationHandler
 )
-from keep_alive import keep_alive
-keep_alive()
+from flask import Flask, request
 
 # Enable logging
 logging.basicConfig(
@@ -266,7 +266,7 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 def main() -> None:
     """Start the bot."""
     # Insert your API token here
-    token = '7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE'
+    token = 'YOUR_TELEGRAM_BOT_API_TOKEN'
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
@@ -306,8 +306,27 @@ def main() -> None:
     # Add check payment handler
     application.add_handler(CallbackQueryHandler(check_payment, pattern='^check_payment$'))
 
-    # Start the Bot
-    application.run_polling()
+    # Create a Flask app
+    app = Flask(__name__)
+
+    @app.route('/webhook', methods=['POST'])
+    def webhook() -> str:
+        json_str = request.get_data(as_text=True)
+        update = Update.de_json(json_str, application.bot)
+        application.process_update(update)
+        return 'ok'
+
+    # Function to set webhook
+    async def set_webhook():
+        webhook_url = 'https://tsouria.onrender.com/webhook'  # Replace with your actual domain
+        await application.bot.set_webhook(url=webhook_url)
+
+    # Set webhook when the bot starts
+    application.job_queue.run_once(lambda context: set_webhook(), 0)
+
+    # Start the Flask app
+    port = int(os.environ.get('PORT', 8443))
+    app.run(host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
     main()
