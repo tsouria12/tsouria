@@ -266,7 +266,7 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 def main() -> None:
     """Start the bot."""
     # Insert your API token here
-    token = os.getenv('7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE')
+    token = os.getenv('TELEGRAM_BOT_API_TOKEN')
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
