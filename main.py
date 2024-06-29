@@ -6,6 +6,8 @@ from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
     MessageHandler, filters, ContextTypes, ConversationHandler
 )
+from keep_alive import keep_alive
+keep_alive()
 
 # Enable logging
 logging.basicConfig(
