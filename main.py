@@ -46,6 +46,7 @@ PRICES = {
 # Define a few command handlers. These usually take the two arguments update and context.
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Send a message when the command /start is issued."""
+    logger.info("Received /start command")
     keyboard = [
         [InlineKeyboardButton("ETH", callback_data='ETH')],
         [InlineKeyboardButton("BNB", callback_data='BNB')],
@@ -68,12 +69,14 @@ async def button(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     # Store the chain selection in the context for future use
     context.user_data['chain'] = query.data
+    logger.info(f"Chain selected: {query.data}")
     return TYPING_TOKEN
 
 async def token_address(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     """Handle token address input."""
     user_address = update.message.text
     context.user_data['token_address'] = user_address
+    logger.info(f"Token address received: {user_address}")
 
     # Ask the user what they want to order
     order_keyboard = [
@@ -88,6 +91,7 @@ async def order(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(text="❔ Send me portal/group link.")
+    logger.info(f"Order selected: {query.data}")
     return TYPING_PORTAL
 
 async def portal_group_link(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -98,6 +102,7 @@ async def portal_group_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
     
     if telegram_link_pattern.match(portal_link):
         context.user_data['portal_link'] = portal_link
+        logger.info(f"Portal link received: {portal_link}")
         # Ask the user to select an open slot
         slot_keyboard = [
             [
@@ -114,6 +119,7 @@ async def portal_group_link(update: Update, context: ContextTypes.DEFAULT_TYPE) 
         return SELECTING_SLOT
     else:
         await update.message.reply_text("❗️ Incorrect portal or group link.")
+        logger.warning("Incorrect portal or group link received")
         return TYPING_PORTAL
 
 async def slot_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -121,6 +127,7 @@ async def slot_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     query = update.callback_query
     await query.answer()
     context.user_data['slot'] = query.data
+    logger.info(f"Slot selected: {query.data}")
     
     # Present period options
     period_keyboard = [
@@ -142,6 +149,7 @@ async def period_selection(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     query = update.callback_query
     await query.answer()
     context.user_data['period'] = query.data
+    logger.info(f"Period selected: {query.data}")
     
     # Gather all the details for confirmation
     token_address = context.user_data.get('token_address')
@@ -209,10 +217,8 @@ async def confirm_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     
     # Clear user data
     context.user_data.clear()
+    logger.info("All configuration data has been deleted.")
     
-    # await query.edit_message_text(text="All configuration data has been deleted. Restarting the bot.")
-    
-    # Restart the bot
     return await start(query, context)
 
 async def cancel_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -220,6 +226,7 @@ async def cancel_delete(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     query = update.callback_query
     await query.answer()
     await query.edit_message_text(text="Deletion cancelled.")
+    logger.info("Deletion cancelled.")
     # End the conversation
     return ConversationHandler.END
 
@@ -236,6 +243,8 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     period = context.user_data.get('period')
     price = PRICES[slot][period]  # Retrieve the price from the dictionary
     
+    logger.info(f"Order confirmed: Token Address: {token_address}, Chain: {chain}, Portal: {portal_link}, Slot: {slot}, Period: {period}, Price: {price}")
+
     payment_information = (
         "❔ <b>Payment Information:</b>\n\n"
         "⤵️<b> Always double-check that you have entered the correct address before sending.</b>\n"
@@ -252,7 +261,6 @@ async def confirm_order(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     
     await query.edit_message_text(payment_information, reply_markup=check_payment_reply_markup, parse_mode=ParseMode.HTML)
 
-    # Here you can add logic to process the confirmed order.
     return ConversationHandler.END
 
 
@@ -261,6 +269,7 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
     query = update.callback_query
     await query.answer()
     await query.message.reply_text(text="❗️ Payment Not Received.")
+    logger.info("Payment check executed: Payment Not Received.")
 
     return ConversationHandler.END
 
@@ -268,6 +277,7 @@ def main() -> None:
     """Start the bot."""
     # Use the provided token directly
     token = '7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE'
+    logger.info("Starting the bot with provided token.")
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
@@ -318,6 +328,7 @@ def main() -> None:
     def webhook() -> str:
         json_str = request.get_data(as_text=True)
         data = json.loads(json_str)  # Parse the JSON data
+        logger.info(f"Webhook received data: {data}")
         update = Update.de_json(data, application.bot)
         application.process_update(update)
         return 'ok'
@@ -326,6 +337,7 @@ def main() -> None:
     async def set_webhook():
         webhook_url = 'https://tsouria.onrender.com/webhook'  # Replace with your actual domain
         await application.bot.set_webhook(url=webhook_url)
+        logger.info(f"Webhook set to: {webhook_url}")
 
     # Set webhook after the app is running
     async def on_startup():
@@ -337,6 +349,7 @@ def main() -> None:
 
     # Start the Flask app
     port = int(os.environ.get('PORT', 5000))
+    logger.info(f"Starting Flask app on port: {port}")
     app.run(host='0.0.0.0', port=port)
 
 if __name__ == '__main__':
