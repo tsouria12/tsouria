@@ -5,7 +5,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
-    MessageHandler, filters, ContextTypes, ConversationHandler, JobQueue
+    MessageHandler, filters, ContextTypes, ConversationHandler
 )
 from flask import Flask, request
 
@@ -265,8 +265,8 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 
 def main() -> None:
     """Start the bot."""
-    # Insert your API token here
-    token = os.getenv('TELEGRAM_BOT_API_TOKEN')
+    # Use the provided token directly
+    token = '7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE'
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
