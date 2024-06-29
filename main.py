@@ -266,7 +266,7 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 def main() -> None:
     """Start the bot."""
     # Insert your API token here
-    token = 'YOUR_TELEGRAM_BOT_API_TOKEN'
+    token = os.getenv('7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE')
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
@@ -325,12 +325,19 @@ def main() -> None:
         webhook_url = 'https://tsouria.onrender.com/webhook'  # Replace with your actual domain
         await application.bot.set_webhook(url=webhook_url)
 
-    # Start the Flask app
-    port = int(os.environ.get('PORT', 4000))
-    app.run(host='0.0.0.0', port=port)
-
     # Set webhook after the app is running
-    application.job_queue.run_once(lambda context: set_webhook(), 1)
+    async def on_startup(application):
+        await set_webhook()
+
+    application.add_handler(CommandHandler("start", start))
+
+    application.run_webhook(
+        listen="0.0.0.0",
+        port=int(os.environ.get('PORT', 5000)),
+        url_path="webhook",
+        webhook_url='https://tsouria.onrender.com/webhook',
+        on_startup=on_startup
+    )
 
 if __name__ == '__main__':
     main()
