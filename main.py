@@ -5,7 +5,7 @@ from telegram import Update, InlineKeyboardMarkup, InlineKeyboardButton
 from telegram.constants import ParseMode
 from telegram.ext import (
     Application, CommandHandler, CallbackQueryHandler,
-    MessageHandler, filters, ContextTypes, ConversationHandler
+    MessageHandler, filters, ContextTypes, ConversationHandler, JobQueue
 )
 from flask import Flask, request
 
@@ -266,7 +266,7 @@ async def check_payment(update: Update, context: ContextTypes.DEFAULT_TYPE) -> i
 def main() -> None:
     """Start the bot."""
     # Insert your API token here
-    token = '7288330417:AAFcIwdAAPe90LGQ918Ao5NIPEmA8LLF9kE'
+    token = 'YOUR_TELEGRAM_BOT_API_TOKEN'
     
     # Create the Application and pass it your bot's token.
     application = Application.builder().token(token).build()
@@ -325,12 +325,12 @@ def main() -> None:
         webhook_url = 'https://tsouria.onrender.com/webhook'  # Replace with your actual domain
         await application.bot.set_webhook(url=webhook_url)
 
-    # Set webhook when the bot starts
-    application.job_queue.run_once(lambda context: set_webhook(), 0)
-
     # Start the Flask app
     port = int(os.environ.get('PORT', 4000))
     app.run(host='0.0.0.0', port=port)
+
+    # Set webhook after the app is running
+    application.job_queue.run_once(lambda context: set_webhook(), 1)
 
 if __name__ == '__main__':
     main()
